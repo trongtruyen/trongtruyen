@@ -1,6 +1,6 @@
 /* main.js — entry point: imports all modules, wires up nav + global events */
 
-import { load, db } from './storage.js';
+import { load, db, resetDb } from './storage.js';
 import { showToast } from './toast.js';
 
 // Modules
@@ -84,6 +84,30 @@ window._closeExportMenu = () => document.getElementById('export-modal')?.classLi
 window._exportJSON = () => { window._closeExportMenu(); exportJSON(); };
 window._exportPDF  = () => { window._closeExportMenu(); exportPDF(); };
 
+/* ── Data-warning modal (New story / Import) ─────── */
+function _openDataWarning(action) {
+  const modal = document.getElementById('data-warning-modal');
+  if (!modal) return;
+  modal.dataset.action = action;
+  modal.classList.add('open');
+}
+window._newStory = () => _openDataWarning('new');
+window._cancelDataWarning = () => document.getElementById('data-warning-modal')?.classList.remove('open');
+window._confirmDataWarning = () => {
+  const modal  = document.getElementById('data-warning-modal');
+  const action = modal?.dataset.action;
+  modal?.classList.remove('open');
+  if (action === 'new') {
+    resetDb();
+    renderAll();
+    switchSection('overview');
+    _updateTopbarTitle();
+    showToast('Đã tạo truyện mới ✓');
+  } else if (action === 'import') {
+    document.getElementById('import-input')?.click();
+  }
+};
+
 /* ── Wire module functions to window ────────────── */
 window.switchSection = switchSection;
 
@@ -145,8 +169,8 @@ window.saveSource       = saveSource;
 window.deleteSource     = deleteSource;
 window.cancelSourceForm = cancelSourceForm;
 
-// Import
-window.triggerImport = triggerImport;
+// Import — show warning first, then open file picker on confirm
+window.triggerImport = () => _openDataWarning('import');
 window.handleImport  = handleImport;
 
 /* ── Init ─────────────────────────────────────────── */
@@ -186,6 +210,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.target === e.currentTarget) e.currentTarget.classList.remove('open');
   });
   document.getElementById('move-chapter-modal')?.addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) e.currentTarget.classList.remove('open');
+  });
+  document.getElementById('data-warning-modal')?.addEventListener('click', (e) => {
     if (e.target === e.currentTarget) e.currentTarget.classList.remove('open');
   });
 });
