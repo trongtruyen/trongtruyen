@@ -14,7 +14,7 @@ import { renderNoteList, showNoteForm, saveNote, deleteNote, cancelNoteForm, not
 import { renderSourceList, showSourceForm, saveSource, deleteSource, cancelSourceForm } from './modules/sources.js';
 import { renderOverview } from './modules/overview.js';
 import { exportJSON, exportPDF } from './export.js';
-import { triggerImport, handleImport } from './import.js';
+import { handleImport } from './import.js';
 
 export { showToast };
 
@@ -54,14 +54,15 @@ function _updateTopbarTitle() {
 window._updateTopbarTitle = _updateTopbarTitle;
 
 /* ── Theme toggle ────────────────────────────────── */
-window._toggleTheme = () => {
+function _toggleTheme() {
   const isDark = document.documentElement.dataset.theme === 'dark';
   const next = isDark ? 'light' : 'dark';
   document.documentElement.dataset.theme = next;
   localStorage.setItem('tt-theme', next);
   const btn = document.getElementById('theme-toggle-btn');
   if (btn) btn.textContent = next === 'dark' ? '🌙 Tối' : '☀ Sáng';
-};
+}
+window._toggleTheme = _toggleTheme;
 
 /* ── renderAll — called after import ────────────── */
 export function renderAll() {
@@ -79,10 +80,12 @@ export function renderAll() {
 }
 
 /* ── Export menu ─────────────────────────────────── */
-window._showExportMenu  = () => document.getElementById('export-modal')?.classList.add('open');
-window._closeExportMenu = () => document.getElementById('export-modal')?.classList.remove('open');
-window._exportJSON = () => { window._closeExportMenu(); exportJSON(); };
-window._exportPDF  = () => { window._closeExportMenu(); exportPDF(); };
+function _showExportMenu()  { document.getElementById('export-modal')?.classList.add('open'); }
+function _closeExportMenu() { document.getElementById('export-modal')?.classList.remove('open'); }
+window._showExportMenu  = _showExportMenu;
+window._closeExportMenu = _closeExportMenu;
+window._exportJSON = () => { _closeExportMenu(); exportJSON(); };
+window._exportPDF  = () => { _closeExportMenu(); exportPDF(); };
 
 /* ── Data-warning modal (New story / Import) ─────── */
 function _openDataWarning(action) {
@@ -91,9 +94,7 @@ function _openDataWarning(action) {
   modal.dataset.action = action;
   modal.classList.add('open');
 }
-window._newStory = () => _openDataWarning('new');
-window._cancelDataWarning = () => document.getElementById('data-warning-modal')?.classList.remove('open');
-window._confirmDataWarning = () => {
+function _confirmDataWarning() {
   const modal  = document.getElementById('data-warning-modal');
   const action = modal?.dataset.action;
   modal?.classList.remove('open');
@@ -106,80 +107,25 @@ window._confirmDataWarning = () => {
   } else if (action === 'import') {
     document.getElementById('import-input')?.click();
   }
-};
+}
+window._newStory           = () => _openDataWarning('new');
+window._cancelDataWarning  = () => document.getElementById('data-warning-modal')?.classList.remove('open');
+window._confirmDataWarning = _confirmDataWarning;
 
-/* ── Wire module functions to window ────────────── */
+/* ── Window exports needed by dynamic HTML in modules ── */
 window.switchSection = switchSection;
-
-// Characters
-window.showCharForm       = () => showCharForm();
-window.saveCharacter      = saveCharacter;
-window.deleteCharacter    = deleteCharacter;
-window.cancelCharForm     = cancelCharForm;
-window.charAddCustomField = charAddCustomField;
-
-// Plot
-window.savePlot           = () => { savePlot(); _updateTopbarTitle(); };
-window.plotAddCustomField = plotAddCustomField;
-
-// Storylines
-window.showStorylineForm       = () => showStorylineForm();
-window.saveStoryline           = saveStoryline;
-window.deleteStoryline         = deleteStoryline;
-window.cancelStorylineForm     = cancelStorylineForm;
-window.storylineAddCustomField = storylineAddCustomField;
-
-// Worlds
-window.showWorldForm       = () => showWorldForm();
-window.saveWorld           = saveWorld;
-window.deleteWorld         = deleteWorld;
-window.cancelWorldForm     = cancelWorldForm;
-window.worldAddCustomField = worldAddCustomField;
-
-// Chapters — created from events; can also be edited standalone
-window.showChapterForm       = (chapId, fromEventId) => showChapterForm(chapId, fromEventId);
-window.saveChapter           = saveChapter;
-window.deleteChapter         = deleteChapter;
-window.cancelChapterForm     = cancelChapterForm;
-window.chapterAddCustomField = chapterAddCustomField;
-
-// Create chapter from event detail
 window._createChapterForEvent = (eventId) => {
   switchSection('chapters');
   showChapterForm(null, eventId);
 };
-
-// Events
-window.showEventForm       = () => showEventForm();
-window.saveEvent           = saveEvent;
-window.deleteEvent         = deleteEvent;
-window.cancelEventForm     = cancelEventForm;
-window.eventAddCustomField = eventAddCustomField;
-
-// Notes
-window.showNoteForm   = () => showNoteForm();
-window.saveNote       = saveNote;
-window.deleteNote     = deleteNote;
-window.cancelNoteForm = cancelNoteForm;
-window.noteAddTag     = noteAddTag;
-
-// Sources
-window.showSourceForm   = () => showSourceForm();
-window.saveSource       = saveSource;
-window.deleteSource     = deleteSource;
-window.cancelSourceForm = cancelSourceForm;
-
-// Import — show warning first, then open file picker on confirm
-window.triggerImport = () => _openDataWarning('import');
-window.handleImport  = handleImport;
 
 /* ── Init ─────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
   // Restore saved theme
   const savedTheme = localStorage.getItem('tt-theme') || 'light';
   document.documentElement.dataset.theme = savedTheme;
-  const btn = document.getElementById('theme-toggle-btn');
-  if (btn) btn.textContent = savedTheme === 'dark' ? '🌙 Tối' : '☀ Sáng';
+  const themeBtn = document.getElementById('theme-toggle-btn');
+  if (themeBtn) themeBtn.textContent = savedTheme === 'dark' ? '🌙 Tối' : '☀ Sáng';
 
   window.renderAll = renderAll;
   load();
@@ -196,15 +142,99 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Import file input
-  const importInput = document.getElementById('import-input');
-  if (importInput) importInput.addEventListener('change', handleImport);
+  document.getElementById('import-input')?.addEventListener('change', handleImport);
 
-  // Close modals on overlay click
+  // Helper: attach click listener by element ID
+  const _on = (id, fn) => document.getElementById(id)?.addEventListener('click', fn);
+
+  // ── Topbar ──────────────────────────────────────────
+  _on('theme-toggle-btn', _toggleTheme);
+  _on('new-story-btn',    () => _openDataWarning('new'));
+  _on('export-btn',       _showExportMenu);
+  _on('import-btn',       () => _openDataWarning('import'));
+
+  // ── Plot ─────────────────────────────────────────────
+  _on('plot-add-custom-btn', plotAddCustomField);
+  _on('save-plot-btn',       () => { savePlot(); _updateTopbarTitle(); });
+
+  // ── Worlds ───────────────────────────────────────────
+  _on('new-world-btn',        () => showWorldForm());
+  _on('world-back-btn',       cancelWorldForm);
+  _on('world-add-custom-btn', worldAddCustomField);
+  _on('save-world-btn',       saveWorld);
+  _on('cancel-world-btn',     cancelWorldForm);
+  _on('world-delete-btn',     deleteWorld);
+
+  // ── Characters ───────────────────────────────────────
+  _on('new-char-btn',        () => showCharForm());
+  _on('char-back-btn',       cancelCharForm);
+  _on('char-add-custom-btn', charAddCustomField);
+  _on('save-char-btn',       saveCharacter);
+  _on('cancel-char-btn',     cancelCharForm);
+  _on('c-delete-btn',        deleteCharacter);
+
+  // ── Storylines ───────────────────────────────────────
+  _on('new-storyline-btn',        () => showStorylineForm());
+  _on('storyline-back-btn',       cancelStorylineForm);
+  _on('storyline-add-custom-btn', storylineAddCustomField);
+  _on('save-storyline-btn',       saveStoryline);
+  _on('cancel-storyline-btn',     cancelStorylineForm);
+  _on('storyline-delete-btn',     deleteStoryline);
+
+  // ── Events / Timeline ────────────────────────────────
+  _on('new-event-btn',      () => showEventForm());
+  _on('event-back-btn',     cancelEventForm);
+  _on('ev-add-custom-btn',  eventAddCustomField);
+  _on('save-event-btn',     saveEvent);
+  _on('cancel-event-btn',   cancelEventForm);
+  _on('ev-delete-btn',      deleteEvent);
+  _on('ev-create-chap-btn', () => window._evOpenCreateChapters?.());
+
+  // ── Chapters ─────────────────────────────────────────
+  _on('chap-back-btn',       cancelChapterForm);
+  _on('chap-add-custom-btn', chapterAddCustomField);
+  _on('save-chap-btn',       saveChapter);
+  _on('cancel-chap-btn',     cancelChapterForm);
+  _on('chap-delete-btn',     deleteChapter);
+
+  // ── Notes ────────────────────────────────────────────
+  _on('new-note-btn',    () => showNoteForm());
+  _on('note-back-btn',   cancelNoteForm);
+  _on('save-note-btn',   saveNote);
+  _on('cancel-note-btn', cancelNoteForm);
+  _on('n-delete-btn',    deleteNote);
+  document.getElementById('n-tag-input')?.addEventListener('keydown', noteAddTag);
+
+  // ── Sources ──────────────────────────────────────────
+  _on('new-source-btn',    () => showSourceForm());
+  _on('source-back-btn',   cancelSourceForm);
+  _on('save-source-btn',   saveSource);
+  _on('cancel-source-btn', cancelSourceForm);
+  _on('s-delete-btn',      deleteSource);
+
+  // ── Export modal ─────────────────────────────────────
+  _on('export-pdf-btn',   () => { _closeExportMenu(); exportPDF(); });
+  _on('export-json-btn',  () => { _closeExportMenu(); exportJSON(); });
+  _on('close-export-btn', _closeExportMenu);
+
+  // ── Data-warning modal ───────────────────────────────
+  _on('cancel-data-warning-btn',  () => document.getElementById('data-warning-modal')?.classList.remove('open'));
+  _on('confirm-data-warning-btn', _confirmDataWarning);
+
+  // ── Create chapters modal ────────────────────────────
+  _on('confirm-create-chapters-btn', () => window._confirmCreateChapters?.());
+  _on('cancel-create-chapters-btn',  () => document.getElementById('create-chapters-modal')?.classList.remove('open'));
+
+  // ── Move chapter modal ───────────────────────────────
+  _on('confirm-move-chapter-btn', () => window._confirmMoveChapter?.());
+  _on('cancel-move-chapter-btn',  () => document.getElementById('move-chapter-modal')?.classList.remove('open'));
+
+  // ── Overlay / backdrop close ─────────────────────────
   document.getElementById('char-popup-overlay')?.addEventListener('click', (e) => {
     if (e.target === e.currentTarget) window._charClosePopup?.();
   });
   document.getElementById('export-modal')?.addEventListener('click', (e) => {
-    if (e.target === e.currentTarget) window._closeExportMenu();
+    if (e.target === e.currentTarget) _closeExportMenu();
   });
   document.getElementById('create-chapters-modal')?.addEventListener('click', (e) => {
     if (e.target === e.currentTarget) e.currentTarget.classList.remove('open');
