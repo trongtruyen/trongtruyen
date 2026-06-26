@@ -24,6 +24,7 @@
     </div>
     <div class="topbar-actions">
       <button class="topbar-btn" id="theme-toggle-btn" onclick="window._toggleTheme()">☀ Sáng</button>
+      <button class="topbar-btn" onclick="window._newStory()">✦ Truyện mới</button>
       <button class="topbar-btn topbar-btn-primary" onclick="window._showExportMenu()">⬇ Xuất file</button>
       <button class="topbar-btn" onclick="window.triggerImport()">⬆ Nhập file</button>
     </div>
@@ -443,6 +444,22 @@
       </button>
     </div>
     <button class="btn btn-sm" onclick="window._closeExportMenu()" style="margin-top:1rem">Hủy</button>
+  </div>
+</div>
+
+<!-- ══ DATA WARNING MODAL ══════════════════════════════════════ -->
+<div class="modal-overlay" id="data-warning-modal">
+  <div class="modal-box" style="max-width:460px">
+    <div style="font-size:36px;text-align:center;margin-bottom:.75rem">⚠️</div>
+    <h3 style="font-size:16px;font-weight:800;margin-bottom:.75rem;text-align:center">Cảnh báo mất dữ liệu</h3>
+    <p style="font-size:13.5px;color:var(--ink-muted);line-height:1.7;text-align:center">
+      Những thông tin hiện tại sẽ mất khi bạn tạo / nhập file truyện mới.<br>
+      Hãy chắc chắn rằng bạn đã <strong>xuất truyện hiện tại thành JSON file</strong> trước khi tiếp tục.
+    </p>
+    <div class="actions" style="margin-top:1.25rem;justify-content:center">
+      <button class="btn btn-primary" onclick="window._cancelDataWarning()">Dừng thao tác</button>
+      <button class="btn btn-danger" onclick="window._confirmDataWarning()">Tiếp Tục</button>
+    </div>
   </div>
 </div>
 

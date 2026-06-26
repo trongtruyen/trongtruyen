@@ -44,6 +44,31 @@ export function save() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
 }
 
+export function resetDb() {
+  db = {
+    meta: { title: '', lastModified: '' },
+    schemas: {
+      characters: { customFields: [] },
+      plot:        { customFields: [] },
+      storylines:  { customFields: [] },
+      worlds:      { customFields: [] },
+      chapters:    { customFields: [] },
+      events:      { customFields: [] }
+    },
+    data: {
+      characters: [],
+      plot:        {},
+      storylines:  [],
+      worlds:      [],
+      chapters:    [],
+      events:      [],
+      notes:       [],
+      sources:     []
+    }
+  };
+  save();
+}
+
 export function replaceDb(newDb) {
   db = newDb;
   if (!db.schemas.storylines) db.schemas.storylines = { customFields: [] };
