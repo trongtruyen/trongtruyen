@@ -28,7 +28,16 @@ export function switchSection(name) {
   const nav = document.querySelector(`.nav-item[data-module="${name}"]`);
   if (sec) sec.classList.add('active');
   if (nav) nav.classList.add('active');
-  if (name === 'overview') renderOverview();
+  // Re-render list sections on every switch so cross-module changes appear immediately.
+  // plot is intentionally excluded — it's a single form and re-rendering would wipe unsaved input.
+  if (name === 'overview')   renderOverview();
+  if (name === 'characters') renderCharList();
+  if (name === 'chapters')   renderChapterList();
+  if (name === 'timeline')   renderEventList();
+  if (name === 'storylines') renderStorylineList();
+  if (name === 'worlds')     renderWorldList();
+  if (name === 'notes')      renderNoteList();
+  if (name === 'sources')    renderSourceList();
 }
 
 window._navBack = () => {
