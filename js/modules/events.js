@@ -178,7 +178,7 @@ function _renderEventChapterList(evId) {
 window._evChapEdit = (chapId) => {
   window._returnSection = 'timeline';
   window.switchSection('chapters');
-  window.showChapterForm(chapId);
+  window._chapEditById?.(chapId);
 };
 
 window._evChapDelete = (chapId, evId) => {
