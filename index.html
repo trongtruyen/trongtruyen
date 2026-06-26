@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trồng Truyện — Công cụ ươm ý tưởng cho tác giả</title>
+  <link rel="stylesheet" href="css/vendor/quill.snow.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/modules.css">
+  <script src="js/vendor/jspdf.min.js"></script>
+  <script src="js/vendor/quill.js"></script>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- ══ TOPBAR ══════════════════════════════════════════════ -->
+  <header class="topbar">
+    <div class="topbar-brand">
+      <span class="topbar-appname">Trồng Truyện</span>
+      <span class="topbar-sep">|</span>
+      <span class="topbar-story-title" id="topbar-plot-title">Câu chuyện chưa đặt tên</span>
+    </div>
+    <div class="topbar-actions">
+      <button class="topbar-btn" id="theme-toggle-btn" onclick="window._toggleTheme()">☀ Sáng</button>
+      <button class="topbar-btn topbar-btn-primary" onclick="window._showExportMenu()">⬇ Xuất file</button>
+      <button class="topbar-btn" onclick="window.triggerImport()">⬆ Nhập file</button>
+    </div>
+  </header>
+
+  <!-- ══ CONTENT SHELL: sidebar + main ═══════════════════ -->
+  <div class="content-shell">
+
+  <!-- ── SIDEBAR ────────────────────────────────────────── -->
+  <nav class="sidebar">
+    <div class="nav-item active" data-module="overview"   style="--tab-c:#D97706;--tab-bg:#FEF3C7">Tổng quan</div>
+    <div class="nav-item" data-module="plot"              style="--tab-c:var(--plot-color);--tab-bg:var(--plot-bg)">Cốt truyện</div>
+    <div class="nav-item" data-module="worlds"            style="--tab-c:var(--world-color);--tab-bg:var(--world-bg)">Thiết lập thế giới</div>
+    <div class="nav-item" data-module="characters"        style="--tab-c:var(--char-color);--tab-bg:var(--char-bg)">Nhân vật</div>
+    <div class="nav-item" data-module="storylines"        style="--tab-c:var(--story-color);--tab-bg:var(--story-bg)">Tuyến truyện</div>
+    <div class="nav-item" data-module="timeline"          style="--tab-c:var(--time-color);--tab-bg:var(--time-bg)">Dòng thời gian</div>
+    <div class="nav-item" data-module="chapters"          style="--tab-c:var(--chap-color);--tab-bg:var(--chap-bg)">Chương</div>
+    <div class="nav-item" data-module="notes"             style="--tab-c:var(--note-color);--tab-bg:var(--note-bg)">Ghi chú</div>
+    <div class="nav-item" data-module="sources"           style="--tab-c:var(--src-color);--tab-bg:var(--src-bg)">Tài liệu</div>
+  </nav>
+
+  <!-- ══ MAIN CONTENT ═════════════════════════════════════ -->
+  <main class="main">
+
+    <!-- ── TỔNG QUAN ─────────────────────────────────── -->
+    <div class="section active" id="sec-overview">
+      <div class="page-header">
+        <h2>Tổng quan</h2>
+        <p>Nhìn toàn cảnh câu chuyện — di chuột để xem chi tiết</p>
+      </div>
+      <div id="overview-content"></div>
+    </div>
+
+    <!-- ── CỐT TRUYỆN ────────────────────────────────── -->
+    <div class="section" id="sec-plot">
+      <div class="page-header">
+        <h2><span class="section-badge" style="background:var(--plot-bg);color:var(--plot-color)">📘 Cốt truyện</span></h2>
+        <p>Tổng quan câu chuyện — tác giả, thể loại, thông điệp</p>
+      </div>
+      <div class="notice" id="plot-estimated-length">Ước tính độ dài truyện: ~0 chương</div>
+      <div class="card">
+        <div class="card-header">Thông tin cốt truyện</div>
+        <div id="plot-core-fields"></div>
+      </div>
+      <div class="card">
+        <div class="card-header">Trường tùy chỉnh</div>
+        <div id="plot-custom-fields"></div>
+        <div class="add-field-row">
+          <div class="field"><label>Tên trường mới</label><input id="plot-newfield-name" type="text" placeholder="VD: Twist chính, Foreshadowing..."></div>
+          <div class="field" style="flex:0 0 140px"><label>Kiểu</label>
+            <select id="plot-newfield-type"><option value="text">Ngắn</option><option value="textarea">Dài</option></select>
+          </div>
+          <button class="btn btn-sm" onclick="window.plotAddCustomField()">+ Thêm</button>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-primary" onclick="window.savePlot()">✓ Lưu cốt truyện</button>
+      </div>
+    </div>
+
+    <!-- ── THIẾT LẬP THẾ GIỚI ────────────────────────── -->
+    <div class="section" id="sec-worlds">
+      <div class="page-header">
+        <h2><span class="section-badge" style="background:var(--world-bg);color:var(--world-color)">🌍 THIẾT LẬP THẾ GIỚI</span></h2>
+        <p>Bối cảnh, xã hội, lịch sử — hỗ trợ nhiều thế giới</p>
+      </div>
+
+      <div id="world-view">
+        <div class="section-header">
+          <h3 id="world-count">0 thế giới</h3>
+          <button class="btn btn-accent" onclick="window.showWorldForm()">+ Thế giới mới</button>
+        </div>
+        <div class="list-wrap" id="world-list-wrap"></div>
+      </div>
+
+      <div id="world-form" style="display:none">
+        <div class="section-header">
+          <h3 id="world-form-title">Thế giới mới</h3>
+          <button class="btn btn-sm" onclick="window.cancelWorldForm()">← Quay lại</button>
+        </div>
+        <div class="card">
+          <div class="card-header">Thông tin cơ bản</div>
+          <div id="world-top-fields"></div>
+        </div>
+        <div class="world-3col-wrap">
+          <div class="world-3col-grid">
+            <div class="world-col-box">
+              <div class="world-col-label">🏔 Môi trường &amp; Địa lý</div>
+              <div id="world-col-env"></div>
+            </div>
+            <div class="world-col-box">
+              <div class="world-col-label">🏘 Xã hội &amp; Văn hoá</div>
+              <div id="world-col-soc"></div>
+            </div>
+            <div class="world-col-box">
+              <div class="world-col-label">⚔ Chính trị &amp; Lịch sử</div>
+              <div id="world-col-pol"></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">Bổ sung</div>
+          <div id="world-bottom-fields"></div>
+        </div>
+        <div class="card">
+          <div class="card-header">Trường tùy chỉnh</div>
+          <div id="world-custom-fields"></div>
+          <div class="add-field-row">
+            <div class="field"><label>Tên trường mới</label><input id="world-newfield-name" type="text" placeholder="VD: Hệ thống phép thuật, Tiền tệ..."></div>
+            <div class="field" style="flex:0 0 140px"><label>Kiểu</label>
+              <select id="world-newfield-type"><option value="text">Ngắn</option><option value="textarea">Dài</option></select>
+            </div>
+            <button class="btn btn-sm" onclick="window.worldAddCustomField()">+ Thêm</button>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn btn-primary" onclick="window.saveWorld()">✓ Lưu thế giới</button>
+          <button class="btn" onclick="window.cancelWorldForm()">Hủy</button>
+          <button class="btn btn-danger" id="world-delete-btn" style="display:none" onclick="window.deleteWorld()">Xóa</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── NHÂN VẬT ───────────────────────────────────── -->
+    <div class="section" id="sec-characters">
+      <div class="page-header">
+        <h2><span class="section-badge" style="background:var(--char-bg);color:var(--char-color)">👤 Nhân vật</span></h2>
+        <p>Xây dựng hồ sơ chi tiết cho từng nhân vật trong câu chuyện</p>
+      </div>
+
+      <!-- List view -->
+      <div id="char-view">
+        <div class="toolbar">
+          <input type="text" id="char-search" placeholder="🔍 Tìm theo tên...">
+          <select id="char-filter-importance">
+            <option value="">Tất cả vai trò</option>
+            <option>Nhân vật chính</option>
+            <option>Nhân vật phụ</option>
+            <option>Nhân vật quần chúng</option>
+          </select>
+          <select id="char-filter-alignment">
+            <option value="">Tất cả phe</option>
+            <option>Chính diện</option>
+            <option>Phản diện</option>
+            <option>Trung lập</option>
+          </select>
+        </div>
+        <div class="section-header">
+          <h3 id="char-count">0 nhân vật</h3>
+          <button class="btn btn-accent" onclick="window.showCharForm()">+ Thêm nhân vật</button>
+        </div>
+        <div class="list-wrap" id="char-list-wrap"></div>
+        <div class="pagination" id="char-pagination"></div>
+      </div>
+
+      <!-- Full edit form -->
+      <div id="char-form" style="display:none">
+        <div class="section-header">
+          <h3 id="char-form-title">Nhân vật mới</h3>
+          <button class="btn btn-sm" onclick="window.cancelCharForm()">← Quay lại</button>
+        </div>
+        <div class="card">
+          <div class="card-header">Thông tin nhân vật</div>
+          <div id="char-core-fields"></div>
+          <div id="char-visible-optionals"></div>
+          <div id="char-optional-area"></div>
+        </div>
+        <div class="card">
+          <div class="card-header">Trường tùy chỉnh</div>
+          <div id="char-custom-fields"></div>
+          <div class="add-field-row">
+            <div class="field"><label>Tên trường mới</label><input id="char-newfield-name" type="text" placeholder="VD: Môn phái, Loại máu..."></div>
+            <div class="field" style="flex:0 0 140px"><label>Kiểu</label>
+              <select id="char-newfield-type"><option value="text">Ngắn</option><option value="textarea">Dài</option></select>
+            </div>
+            <button class="btn btn-sm" onclick="window.charAddCustomField()">+ Thêm</button>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn btn-primary" onclick="window.saveCharacter()">✓ Lưu nhân vật</button>
+          <button class="btn" onclick="window.cancelCharForm()">Hủy</button>
+          <button class="btn btn-danger" id="c-delete-btn" style="display:none" onclick="window.deleteCharacter()">Xóa</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TUYẾN TRUYỆN ───────────────────────────────── -->
+    <div class="section" id="sec-storylines">
+      <div class="page-header">
+        <h2><span class="section-badge" style="background:var(--story-bg);color:var(--story-color)">🔀 Tuyến truyện</span></h2>
+        <p>Các arc / tuyến truyện song song trong câu chuyện</p>
+      </div>
+
+      <div id="storyline-view">
+        <div class="section-header">
+          <h3 id="storyline-count">0 tuyến truyện</h3>
+          <button class="btn btn-accent" onclick="window.showStorylineForm()">+ Thêm tuyến truyện</button>
+        </div>
+        <div class="list-wrap" id="storyline-list-wrap"></div>
+      </div>
+
+      <div id="storyline-form" style="display:none">
+        <div class="section-header">
+          <h3 id="storyline-form-title">Tuyến truyện mới</h3>
+          <button class="btn btn-sm" onclick="window.cancelStorylineForm()">← Quay lại</button>
+        </div>
+        <div class="card">
+          <div class="card-header">Chi tiết tuyến truyện</div>
+          <div id="storyline-core-fields"></div>
+          <div id="storyline-reverse-links"></div>
+          <div id="storyline-reverse-chapters"></div>
+        </div>
+        <div class="card">
+          <div class="card-header">Trường tùy chỉnh</div>
+          <div id="storyline-custom-fields"></div>
+          <div class="add-field-row">
+            <div class="field"><label>Tên trường mới</label><input id="storyline-newfield-name" type="text" placeholder="VD: Chủ đề arc, Kết thúc dự kiến..."></div>
+            <div class="field" style="flex:0 0 140px"><label>Kiểu</label>
+              <select id="storyline-newfield-type"><option value="text">Ngắn</option><option value="textarea">Dài</option></select>
+            </div>
+            <button class="btn btn-sm" onclick="window.storylineAddCustomField()">+ Thêm</button>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn btn-primary" onclick="window.saveStoryline()">✓ Lưu tuyến truyện</button>
+          <button class="btn" onclick="window.cancelStorylineForm()">Hủy</button>
+          <button class="btn btn-danger" id="storyline-delete-btn" style="display:none" onclick="window.deleteStoryline()">Xóa</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── DÒNG THỜI GIAN / SỰ KIỆN ─────────────────── -->
+    <div class="section" id="sec-timeline">
+      <div class="page-header">
+        <h2><span class="section-badge" style="background:var(--time-bg);color:var(--time-color)">🕐 Dòng thời gian / Sự kiện</span></h2>
+        <p>Diễn biến theo trục thời gian — kéo thả để sắp xếp lại thứ tự</p>
+      </div>
+
+      <div id="timeline-view">
+        <div class="section-header">
+          <h3 id="ev-count">0 sự kiện</h3>
+          <button class="btn btn-accent" onclick="window.showEventForm()">+ Thêm sự kiện</button>
+        </div>
+        <div class="timeline" id="timeline-list"></div>
+      </div>
+
+      <div id="event-form" style="display:none">
+        <div class="section-header">
+          <h3 id="ev-form-title">Sự kiện mới</h3>
+          <button class="btn btn-sm" onclick="window.cancelEventForm()">← Quay lại</button>
+        </div>
+        <div class="card">
+          <div class="card-header">Chi tiết sự kiện</div>
+          <div id="event-core-fields"></div>
+          <div id="event-reverse-storylines"></div>
+          <div id="event-reverse-chapters"></div>
+        </div>
+        <div class="card">
+          <div class="card-header">Trường tùy chỉnh</div>
+          <div id="event-custom-fields"></div>
+          <div class="add-field-row">
+            <div class="field"><label>Tên trường mới</label><input id="ev-newfield-name" type="text" placeholder="VD: Hậu quả, Địa điểm..."></div>
+            <div class="field" style="flex:0 0 140px"><label>Kiểu</label>
+              <select id="ev-newfield-type"><option value="text">Ngắn</option><option value="textarea">Dài</option></select>
+            </div>
+            <button class="btn btn-sm" onclick="window.eventAddCustomField()">+ Thêm</button>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn btn-primary" onclick="window.saveEvent()">✓ Lưu sự kiện</button>
+          <button class="btn" onclick="window.cancelEventForm()">← Quay lại</button>
+          <button class="btn btn-danger" id="ev-delete-btn" style="display:none" onclick="window.deleteEvent()">Xóa</button>
+          <button class="btn btn-accent" id="ev-create-chap-btn" style="display:none" onclick="window._evOpenCreateChapters()">+ Tạo chương</button>
+        </div>
+        <div id="ev-chapter-list" style="margin-top:1rem"></div>
+      </div>
+    </div>
+
+    <!-- ── CHƯƠNG ─────────────────────────────────────── -->
+    <div class="section" id="sec-chapters">
+      <div class="page-header">
+        <h2><span class="section-badge" style="background:var(--chap-bg);color:var(--chap-color)">📄 Chương</span></h2>
+        <p>Danh sách chương đã lên kế hoạch — tạo chương từ tab Dòng thời gian</p>
+      </div>
+
+      <div id="chapter-view">
+        <div class="section-header">
+          <h3 id="chap-count">Tổng: 0 chương</h3>
+        </div>
+        <div id="chapter-list-wrap"></div>
+      </div>
+
+      <div id="chapter-form" style="display:none">
+        <div class="section-header">
+          <h3 id="chap-form-title">Chương mới</h3>
+          <button class="btn btn-sm" onclick="window.cancelChapterForm()">← Quay lại</button>
+        </div>
+        <div class="card">
+          <div class="card-header">Chi tiết chương</div>
+          <div id="chapter-core-fields"></div>
+        </div>
+        <div class="card">
+          <div class="card-header">Trường tùy chỉnh</div>
+          <div id="chapter-custom-fields"></div>
+          <div class="add-field-row">
+            <div class="field"><label>Tên trường mới</label><input id="chap-newfield-name" type="text" placeholder="VD: POV, Thời tiết..."></div>
+            <div class="field" style="flex:0 0 140px"><label>Kiểu</label>
+              <select id="chap-newfield-type"><option value="text">Ngắn</option><option value="textarea">Dài</option></select>
+            </div>
+            <button class="btn btn-sm" onclick="window.chapterAddCustomField()">+ Thêm</button>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn btn-primary" onclick="window.saveChapter()">✓ Lưu chương</button>
+          <button class="btn" onclick="window.cancelChapterForm()">Hủy</button>
+          <button class="btn btn-danger" id="chap-delete-btn" style="display:none" onclick="window.deleteChapter()">Xóa</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── GHI CHÚ ────────────────────────────────────── -->
+    <div class="section" id="sec-notes">
+      <div class="page-header">
+        <h2><span class="section-badge" style="background:var(--note-bg);color:var(--note-color)">📝 Ghi chú</span></h2>
+        <p>Ý tưởng tự do, không giới hạn</p>
+      </div>
+
+      <div id="notes-view">
+        <div class="section-header">
+          <h3 id="note-count">0 ghi chú</h3>
+          <button class="btn btn-accent" onclick="window.showNoteForm()">+ Thêm ghi chú</button>
+        </div>
+        <div class="list-wrap" id="notes-list"></div>
+      </div>
+
+      <div id="note-form" style="display:none">
+        <div class="section-header">
+          <h3>Ghi chú</h3>
+          <button class="btn btn-sm" onclick="window.cancelNoteForm()">← Quay lại</button>
+        </div>
+        <div class="card">
+          <div class="field"><label>Tiêu đề</label><input id="n-title" type="text" placeholder="Tiêu đề ghi chú..."></div>
+          <div class="field"><label>Nội dung</label><div id="n-content-editor" style="min-height:160px"></div></div>
+          <div class="field">
+            <label>Tags (nhấn Enter để thêm)</label>
+            <input id="n-tag-input" type="text" placeholder="Thêm tag..." onkeydown="window.noteAddTag(event)">
+            <div class="tags-wrap" id="n-tags"></div>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn btn-primary" onclick="window.saveNote()">✓ Lưu ghi chú</button>
+          <button class="btn" onclick="window.cancelNoteForm()">Hủy</button>
+          <button class="btn btn-danger" id="n-delete-btn" style="display:none" onclick="window.deleteNote()">Xóa</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TÀI LIỆU ───────────────────────────────────── -->
+    <div class="section" id="sec-sources">
+      <div class="page-header">
+        <h2><span class="section-badge" style="background:var(--src-bg);color:var(--src-color)">🔗 Tài liệu</span></h2>
+        <p>Link, sách, bài viết tham khảo</p>
+      </div>
+      <div class="notice">💡 Lưu mọi nguồn cảm hứng để dễ tìm lại sau</div>
+
+      <div id="sources-view">
+        <div class="section-header">
+          <h3 id="src-count">0 tài liệu</h3>
+          <button class="btn btn-accent" onclick="window.showSourceForm()">+ Thêm tài liệu</button>
+        </div>
+        <div id="sources-list"></div>
+      </div>
+
+      <div id="source-form" style="display:none">
+        <div class="section-header">
+          <h3>Tài liệu</h3>
+          <button class="btn btn-sm" onclick="window.cancelSourceForm()">← Quay lại</button>
+        </div>
+        <div class="card">
+          <div class="field"><label>Tiêu đề *</label><input id="s-title" type="text" placeholder="Tên sách / bài viết / nguồn..."></div>
+          <div class="grid2">
+            <div class="field"><label>Loại</label>
+              <select id="s-type"><option>Link web</option><option>Sách</option><option>Bài báo</option><option>Video</option><option>Khác</option></select>
+            </div>
+            <div class="field"><label>Link URL</label><input id="s-url" type="text" placeholder="https://..."></div>
+          </div>
+          <div class="field"><label>Ghi chú</label><textarea id="s-notes" style="min-height:60px" placeholder="Tại sao tài liệu này hữu ích?"></textarea></div>
+        </div>
+        <div class="actions">
+          <button class="btn btn-primary" onclick="window.saveSource()">✓ Lưu tài liệu</button>
+          <button class="btn" onclick="window.cancelSourceForm()">Hủy</button>
+          <button class="btn btn-danger" id="s-delete-btn" style="display:none" onclick="window.deleteSource()">Xóa</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+  </div><!-- /content-shell -->
+</div><!-- /app-shell -->
+
+<!-- ══ CHARACTER QUICK-VIEW POPUP ══════════════════════════════ -->
+<div class="modal-overlay" id="char-popup-overlay">
+  <div class="modal-box"></div>
+</div>
+
+<!-- ══ EXPORT MODAL ════════════════════════════════════════════ -->
+<div class="modal-overlay" id="export-modal">
+  <div class="modal-box" style="max-width:360px;text-align:center">
+    <h3 style="font-size:17px;font-weight:700;margin-bottom:1rem">Xuất file</h3>
+    <p style="font-size:13px;color:var(--ink-muted);margin-bottom:1.5rem">Chọn định dạng xuất bên dưới</p>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <button class="btn btn-primary" onclick="window._exportPDF()" style="justify-content:center">
+        🖨 In / Lưu PDF — mở cửa sổ in
+      </button>
+      <button class="btn" onclick="window._exportJSON()" style="justify-content:center">
+        📦 Xuất JSON — sao lưu / chuyển máy
+      </button>
+    </div>
+    <button class="btn btn-sm" onclick="window._closeExportMenu()" style="margin-top:1rem">Hủy</button>
+  </div>
+</div>
+
+<!-- ══ CREATE CHAPTERS MODAL ═══════════════════════════════════ -->
+<div class="modal-overlay" id="create-chapters-modal">
+  <div class="modal-box" style="max-width:360px">
+    <h3 style="font-size:16px;font-weight:700;margin-bottom:1rem">Tạo chương cho sự kiện này</h3>
+    <div class="field">
+      <label>Bạn muốn tạo bao nhiêu chương?</label>
+      <input id="create-chapters-count" type="number" min="1" max="50" value="1">
+    </div>
+    <div class="actions" style="margin-top:1rem">
+      <button class="btn btn-primary" onclick="window._confirmCreateChapters()">✓ Tạo chương</button>
+      <button class="btn" onclick="document.getElementById('create-chapters-modal').classList.remove('open')">Hủy</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MOVE CHAPTER MODAL ══════════════════════════════════════ -->
+<div class="modal-overlay" id="move-chapter-modal">
+  <div class="modal-box" style="max-width:360px">
+    <h3 style="font-size:16px;font-weight:700;margin-bottom:1rem">Chuyển chương sang sự kiện khác</h3>
+    <div class="field">
+      <label>Chọn sự kiện đích</label>
+      <select id="move-chapter-event-select"></select>
+    </div>
+    <div class="actions" style="margin-top:1rem">
+      <button class="btn btn-primary" onclick="window._confirmMoveChapter()">✓ Chuyển</button>
+      <button class="btn" onclick="document.getElementById('move-chapter-modal').classList.remove('open')">Hủy</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TOAST + IMPORT ══════════════════════════════════════════ -->
+<div class="toast" id="toast"></div>
+<input type="file" id="import-input" accept=".json" style="display:none">
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

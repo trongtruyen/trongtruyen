@@ -1,0 +1,16 @@
+/* modules.css — per-module color tokens + severity colors */
+
+:root {
+  --char-color:    #7C3AED; --char-bg:    #F5F3FF;
+  --plot-color:    #0369A1; --plot-bg:    #E0F2FE;
+  --story-color:   #C2410C; --story-bg:   #FFF7ED;
+  --world-color:   #047857; --world-bg:   #ECFDF5;
+  --chap-color:    #B45309; --chap-bg:    #FFFBEB;
+  --time-color:    #BE185D; --time-bg:    #FDF2F8;
+  --note-color:    #0F766E; --note-bg:    #F0FDFA;
+  --src-color:     #4338CA; --src-bg:     #EEF2FF;
+
+  --severity-high: #DC2626;
+  --severity-mid:  #D97706;
+  --severity-low:  #94A3B8;
+}
