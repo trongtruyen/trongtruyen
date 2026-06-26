@@ -227,7 +227,7 @@ db = {
 |---|---|---|---|
 | `id` | *(hidden)* | — | system — auto-generated (e.g. `char_001`), used by other modules to reference this character (section 3.7) |
 | `name` | Character name | text | **Required, fixed** |
-| `roleImportance` | Importance | multi-tag | **Required** (select ≥1), fixed. Options: Protagonist / Supporting |
+| `roleImportance` | Importance | multi-tag | **Required** (select ≥1), fixed. Options: **Nhân vật chính** (protagonist — central to the whole plot) / **Nhân vật phụ** (supporting — appears throughout, mid-level role) / **Nhân vật quần chúng** (crowd/minor — appears in 1–2 events only, no major plot impact). Each option shows an inline hint text below the selector to guide the user's choice. Each tier has its own color: protagonist = purple `#7C3AED`, supporting = blue `#1D4ED8`, minor = gray `#6B7280`. |
 | `roleAlignment` | Alignment | multi-tag | **Required** (select ≥1), fixed. Options: Hero / Villain / Neutral |
 | `avatar` | Avatar image | image | Value optional, field is fixed and always shown (section 3.6) |
 | `gender` | Gender | select | Fixed, always shown. Options: Male / Female / Other |
@@ -574,10 +574,10 @@ function getOccurrenceLengths(event, occurrenceCount) {
 
 **Layer 1 — List (default view when entering this module):**
 
-- Shown as a simple list (NOT a multi-column table) — each row shows only: avatar/symbol, name, role tags (`roleImportance` + `roleAlignment`).
+- Shown as a **card grid** (`auto-fill, minmax(175px, 1fr)`) — each card shows: avatar/symbol, name, role badges (color-coded by `roleImportance` tier — purple/blue/gray), and a short personality excerpt (max 80 characters, truncated with "…"). NOT a simple single-column list.
 - **Toolbar:** Search by name (filters live as you type, case-insensitive) · Filter by tag (`roleImportance` and/or `roleAlignment`) · Sort by name (using `localeCompare(..., 'vi')`).
 - Pagination at the bottom — default 20 characters/page, computed on the filtered/searched result.
-- Clicking a row → opens the Quick-view Popup (Layer 2), without switching screens entirely.
+- Clicking a card → opens the Quick-view Popup (Layer 2), without switching screens entirely.
 - "+ Add character" button → opens the full edit Form (Layer 3) directly, in a blank state.
 
 **Layer 2 — Quick-view Popup:**
@@ -603,13 +603,21 @@ Shows a reference figure, "Estimated length: ~N chapters" — computed from the 
 
 UI similar to the Characters module pattern: a simple list of storylines (name + count of related characters/events), clicking through to a detail view with a summary + three link sections (characters/events/other storylines). Since the number of storylines is typically small (a story might have only 3–10 arcs), pagination may not be needed.
 
+**Storyline cards on the list view** show: title, summary text, and a **collapsible event list** (`<details>`/`<summary>`) — collapsed by default, click to expand and see the events linked to that storyline. Each event row within the expanded list shows the event title plus two inline action buttons: **Sửa** (edit — navigates to the Timeline and opens that event's form) and **Gỡ** (remove — removes the event from this storyline only, with a confirmation prompt; does not delete the event itself).
+
 ### 4.4. Module: World Setting (Worlds)
 
 Since this is now a list (section 3.3), it needs UI similar to Storylines — a list of worlds (usually just one) + a "+ Add world" button for anyone who needs more than one. The detail form follows the 3 fixed pillars (Environment/Politics/Society) plus optional Exceptions/History fields (always shown, no dynamic show/hide).
 
+**3-column form layout:** The three core pillars — "Môi trường & Địa lý" (Environment & Geography), "Xã hội & Văn hoá" (Society & Culture), and "Chính trị & Lịch sử" (Politics & History) — are displayed side-by-side in a **3-column CSS grid** (`repeat(3, 1fr)`). Rationale: these three aspects are interconnected and authors frequently need to reference them together when filling in details. The fields that appear above (title, spacetime, desc) and below (exception, notes) the 3-column block are full-width.
+
 ### 4.5. Module: Chapters / Scenes
 
-Apply the same list-view pattern with search/filter/sort/pagination as the Characters module. This is where the Chapter Planning Engine (section 3.12) is implemented — drag-and-drop UI for arranging events, displaying an auto-numbered chapter scaffold.
+Apply the same list-view pattern with search/filter/sort/pagination as the Characters module.
+
+**Chapters are grouped by their parent event** in the list view — each event appears as a collapsible `<details>`/`<summary>` group header (open by default). The header shows: a severity color dot, the event title, and the chapter count for that group. Chapters within a group are shown as rows with title, order, and inline Sửa/Xóa/Chuyển (edit/delete/move) action buttons. This grouping replaces the flat list from earlier designs and makes it easier to see how chapters map to events.
+
+The Chapter Planning Engine from section 3.12 (drag-and-drop auto-numbering scaffold) is a v1.5 feature — not implemented in v1. In v1, chapter creation is driven manually from the Event detail form (a "+ Tạo chương" button that opens a modal to select how many chapters to create), or edited standalone in the Chapters module.
 
 ### 4.6. Module: Timeline (Events)
 
@@ -725,9 +733,13 @@ The file downloads to the user's machine — no server involved
 ### 5.5. Importing a JSON File
 
 ```
-"Import JSON" → choose a file from disk
+Click "Nhập file" (Import) in the topbar
         ↓
-Read the file via FileReader → JSON.parse()
+Data-loss warning modal appears (see 5.7)
+User chooses: "Dừng thao tác" (cancel) → modal closes, nothing changes
+             "Tiếp Tục" (continue) → OS file picker opens
+        ↓
+User selects a JSON file → FileReader reads it → JSON.parse()
         ↓
 Validate basic structure: does it have data and schemas?
         ├── INVALID → show an error, do NOT change the current db
@@ -745,12 +757,35 @@ Currently working on Story A → want to switch to Story B
         ↓
 (Recommended) Export Story A's JSON first as a backup
         ↓
-Import Story B's JSON file
+Import Story B's JSON file (triggers the data-loss warning — section 5.7)
         ↓
 db is completely overwritten with Story B's data → the app displays Story B
 ```
 
 This is why the app only needs to support "one story per session" — there's no need for a separate "manage multiple stories" screen.
+
+### 5.7. Creating a New Story ("Truyện mới")
+
+A **"✦ Truyện mới"** button sits in the topbar between the theme toggle and the Export button. Clicking it (or clicking "Nhập file") triggers a **data-loss warning modal** before proceeding, because both actions would erase all current localStorage data.
+
+```
+Click "✦ Truyện mới" or "⬆ Nhập file"
+        ↓
+Modal appears with message:
+  "Những thông tin hiện tại sẽ mất khi bạn tạo / nhập file truyện mới.
+   Hãy chắc chắn rằng bạn đã xuất truyện hiện tại thành JSON file trước khi tiếp tục."
+Two buttons:
+  "Dừng thao tác" → close modal, no change
+  "Tiếp Tục"      → proceed
+        ↓
+If "Truyện mới" was the trigger:
+  resetDb() resets all data to blank defaults → renderAll() → switchSection('overview')
+  → toast "Đã tạo truyện mới ✓"
+If "Nhập file" was the trigger:
+  OS file picker opens → continue as per section 5.5
+```
+
+`resetDb()` (in `storage.js`) creates a fresh blank `db` object (empty arrays, empty schemas, empty meta) and saves it to localStorage immediately. Clicking overlay outside the modal also closes it without acting.
 
 ---
 
@@ -945,6 +980,18 @@ trong-truyen/
 - Each module file exports functions following a fixed pattern: `render<Module>Form()`, `render<Module>List()`, `save<Module>()`, `edit<Module>()`/`show<Module>Form()`, `delete<Module>()`.
 - `main.js` only performs "assembly" duties: importing every module, calling `load()`, wiring up event listeners — it contains no business logic.
 
+**Event handler pattern (important — required for ES Modules):**
+
+All static HTML button events in `index.html` are wired via `addEventListener` inside `main.js`'s `DOMContentLoaded` block — **never via inline `onclick` attributes**. This is a hard requirement because ES Modules are function-scoped and do NOT attach to `window` by default; inline `onclick="fnName()"` would silently fail in production (GitHub Pages) with "Uncaught TypeError: window.fnName is not a function."
+
+Static buttons in `index.html` have explicit `id` attributes. `main.js` uses a helper pattern:
+```javascript
+const _on = (id, fn) => document.getElementById(id)?.addEventListener('click', fn);
+_on('save-plot-btn', () => { savePlot(); _updateTopbarTitle(); });
+```
+
+**Exception:** Dynamically generated HTML (innerHTML strings built in JS module files) uses `window.xxx?.()` references in its inline handlers — because those elements are created after `DOMContentLoaded` fires and would require event delegation otherwise. Functions that dynamically generated HTML calls (e.g. `window._charOpenPopup`, `window._evEdit`, `window.switchSection`) remain assigned to `window` at module load time.
+
 ### 8.3. Naming Conventions
 
 | Object | Convention | Example |
@@ -1089,3 +1136,49 @@ A local-first + optional sync model (not required, doesn't affect users who don'
 | `sources` | title*, type, url, notes | — | No |
 
 `*` = required field (section 7.1)
+
+---
+
+## Appendix C — Update History
+
+Records significant implementation changes made after the initial spec was written. Most recent first.
+
+---
+
+### 2026-06-26 — ES Module Event Handler Refactor
+
+**Files changed:** `index.html`, `js/main.js`
+
+**Change:** Removed every `onclick`, `onkeydown`, and other inline event attribute from all static HTML elements in `index.html`. Added unique `id` attributes to all previously-anonymous buttons (~25 new IDs). All event listeners are now wired via `addEventListener` inside `main.js`'s `DOMContentLoaded` block using a helper pattern (`const _on = (id, fn) => ...`).
+
+**Why:** ES Modules are scoped — functions imported into a module file do not automatically attach to `window`. Inline `onclick="fnName()"` in HTML silently fails in production (GitHub Pages) because the browser looks for `window.fnName` and finds nothing. The fix ensures every button works correctly regardless of whether the script is served via `file://`, Live Server, or GitHub Pages.
+
+**Scope note:** Only static HTML buttons were changed. Dynamically generated HTML (innerHTML strings built inside JS module files) continues to use `window.xxx?.()` references because those elements are created after DOMContentLoaded and would require event delegation otherwise. Functions they reference remain assigned to `window` at module load time.
+
+---
+
+### 2026-06-26 — UI Improvements (Session 1)
+
+**Files changed:** `js/schema.js`, `js/form-renderer.js`, `js/modules/characters.js`, `js/modules/chapters.js`, `js/modules/worlds.js`, `js/modules/storylines.js`, `js/storage.js`, `js/main.js`, `index.html`, `css/components.css`
+
+**Changes:**
+
+1. **Character card grid** — the character list was changed from a flat row list to a responsive card grid (`auto-fill, minmax(175px, 1fr)`). Each card shows: avatar/symbol, name, `roleImportance` badges (color-coded), and a 80-char personality excerpt. Cards are clickable to open the quick-view popup.
+
+2. **`roleImportance` 3-tier update** — expanded from 2 options (Protagonist/Supporting) to 3: **Nhân vật chính** (purple), **Nhân vật phụ** (blue), **Nhân vật quần chúng** (gray). Added `optionHints` property to the field definition in `schema.js`; `form-renderer.js` renders these as descriptive hint text below the multi-tag selector.
+
+3. **Chapters module — collapsible event groups** — the chapter list now groups chapters under their parent event using `<details>`/`<summary>` (open by default). Each group header shows a severity dot, event title, and chapter count. Inline Sửa/Xóa/Chuyển buttons on each chapter row. The Chapter Planning Engine (drag-and-drop auto-numbering from spec section 3.12) is deferred to v1.5; chapter creation in v1 is driven from the Event form via a "+ Tạo chương" button that opens a modal.
+
+4. **World form 3-column layout** — the three major world pillars (Environment & Geography | Society & Culture | Politics & History) are now displayed side-by-side in a `repeat(3, 1fr)` CSS grid inside the world edit form. Title/spacetime/desc appear above the grid; exception/notes appear below — all full-width.
+
+5. **Storyline event list** — each storyline card on the list view now shows the storyline description and a collapsible list of linked events. Each event row has **Sửa** (navigate to Timeline + open event form) and **Gỡ** (remove event from storyline, with confirm) buttons.
+
+6. **"Truyện mới" topbar button** — added "✦ Truyện mới" button to the topbar between the theme toggle and "Xuất file". Clicking it shows a data-loss warning modal (same modal as "Nhập file"). On confirm, calls `resetDb()` → `renderAll()` → navigates to Overview with a success toast.
+
+7. **Data-loss warning modal** — a shared modal (`#data-warning-modal`) appears whenever the user clicks "Truyện mới" or "Nhập file". Warns that current data will be lost and recommends exporting first. Buttons: "Dừng thao tác" (cancel) and "Tiếp Tục" (proceed). Clicking the backdrop also cancels.
+
+8. **`resetDb()` in storage.js** — added a new export function that resets `db` to a blank-defaults state (empty arrays, empty schemas, empty meta) and saves to localStorage.
+
+9. **`overview.js` navigation** — the overview section now shows a full plot info block and makes hover cards clickable, navigating to the corresponding module section.
+
+10. **History tracking / `_navBack()`** — `main.js` added a `_returnSection` mechanism. Modules can set `window._returnSection = 'sectionName'` before navigating away; calling `window._navBack()` returns to that section. Used when editing an event from within the Storylines view.
