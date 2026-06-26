@@ -23,10 +23,10 @@
       <span class="topbar-story-title" id="topbar-plot-title">Câu chuyện chưa đặt tên</span>
     </div>
     <div class="topbar-actions">
-      <button class="topbar-btn" id="theme-toggle-btn" onclick="window._toggleTheme()">☀ Sáng</button>
-      <button class="topbar-btn" onclick="window._newStory()">✦ Truyện mới</button>
-      <button class="topbar-btn topbar-btn-primary" onclick="window._showExportMenu()">⬇ Xuất file</button>
-      <button class="topbar-btn" onclick="window.triggerImport()">⬆ Nhập file</button>
+      <button class="topbar-btn" id="theme-toggle-btn">☀ Sáng</button>
+      <button class="topbar-btn" id="new-story-btn">✦ Truyện mới</button>
+      <button class="topbar-btn topbar-btn-primary" id="export-btn">⬇ Xuất file</button>
+      <button class="topbar-btn" id="import-btn">⬆ Nhập file</button>
     </div>
   </header>
 
@@ -77,11 +77,11 @@
           <div class="field" style="flex:0 0 140px"><label>Kiểu</label>
             <select id="plot-newfield-type"><option value="text">Ngắn</option><option value="textarea">Dài</option></select>
           </div>
-          <button class="btn btn-sm" onclick="window.plotAddCustomField()">+ Thêm</button>
+          <button class="btn btn-sm" id="plot-add-custom-btn">+ Thêm</button>
         </div>
       </div>
       <div class="actions">
-        <button class="btn btn-primary" onclick="window.savePlot()">✓ Lưu cốt truyện</button>
+        <button class="btn btn-primary" id="save-plot-btn">✓ Lưu cốt truyện</button>
       </div>
     </div>
 
@@ -95,7 +95,7 @@
       <div id="world-view">
         <div class="section-header">
           <h3 id="world-count">0 thế giới</h3>
-          <button class="btn btn-accent" onclick="window.showWorldForm()">+ Thế giới mới</button>
+          <button class="btn btn-accent" id="new-world-btn">+ Thế giới mới</button>
         </div>
         <div class="list-wrap" id="world-list-wrap"></div>
       </div>
@@ -103,7 +103,7 @@
       <div id="world-form" style="display:none">
         <div class="section-header">
           <h3 id="world-form-title">Thế giới mới</h3>
-          <button class="btn btn-sm" onclick="window.cancelWorldForm()">← Quay lại</button>
+          <button class="btn btn-sm" id="world-back-btn">← Quay lại</button>
         </div>
         <div class="card">
           <div class="card-header">Thông tin cơ bản</div>
@@ -137,13 +137,13 @@
             <div class="field" style="flex:0 0 140px"><label>Kiểu</label>
               <select id="world-newfield-type"><option value="text">Ngắn</option><option value="textarea">Dài</option></select>
             </div>
-            <button class="btn btn-sm" onclick="window.worldAddCustomField()">+ Thêm</button>
+            <button class="btn btn-sm" id="world-add-custom-btn">+ Thêm</button>
           </div>
         </div>
         <div class="actions">
-          <button class="btn btn-primary" onclick="window.saveWorld()">✓ Lưu thế giới</button>
-          <button class="btn" onclick="window.cancelWorldForm()">Hủy</button>
-          <button class="btn btn-danger" id="world-delete-btn" style="display:none" onclick="window.deleteWorld()">Xóa</button>
+          <button class="btn btn-primary" id="save-world-btn">✓ Lưu thế giới</button>
+          <button class="btn" id="cancel-world-btn">Hủy</button>
+          <button class="btn btn-danger" id="world-delete-btn" style="display:none">Xóa</button>
         </div>
       </div>
     </div>
@@ -174,7 +174,7 @@
         </div>
         <div class="section-header">
           <h3 id="char-count">0 nhân vật</h3>
-          <button class="btn btn-accent" onclick="window.showCharForm()">+ Thêm nhân vật</button>
+          <button class="btn btn-accent" id="new-char-btn">+ Thêm nhân vật</button>
         </div>
         <div class="list-wrap" id="char-list-wrap"></div>
         <div class="pagination" id="char-pagination"></div>
@@ -184,7 +184,7 @@
       <div id="char-form" style="display:none">
         <div class="section-header">
           <h3 id="char-form-title">Nhân vật mới</h3>
-          <button class="btn btn-sm" onclick="window.cancelCharForm()">← Quay lại</button>
+          <button class="btn btn-sm" id="char-back-btn">← Quay lại</button>
         </div>
         <div class="card">
           <div class="card-header">Thông tin nhân vật</div>
@@ -200,13 +200,13 @@
             <div class="field" style="flex:0 0 140px"><label>Kiểu</label>
               <select id="char-newfield-type"><option value="text">Ngắn</option><option value="textarea">Dài</option></select>
             </div>
-            <button class="btn btn-sm" onclick="window.charAddCustomField()">+ Thêm</button>
+            <button class="btn btn-sm" id="char-add-custom-btn">+ Thêm</button>
           </div>
         </div>
         <div class="actions">
-          <button class="btn btn-primary" onclick="window.saveCharacter()">✓ Lưu nhân vật</button>
-          <button class="btn" onclick="window.cancelCharForm()">Hủy</button>
-          <button class="btn btn-danger" id="c-delete-btn" style="display:none" onclick="window.deleteCharacter()">Xóa</button>
+          <button class="btn btn-primary" id="save-char-btn">✓ Lưu nhân vật</button>
+          <button class="btn" id="cancel-char-btn">Hủy</button>
+          <button class="btn btn-danger" id="c-delete-btn" style="display:none">Xóa</button>
         </div>
       </div>
     </div>
@@ -221,7 +221,7 @@
       <div id="storyline-view">
         <div class="section-header">
           <h3 id="storyline-count">0 tuyến truyện</h3>
-          <button class="btn btn-accent" onclick="window.showStorylineForm()">+ Thêm tuyến truyện</button>
+          <button class="btn btn-accent" id="new-storyline-btn">+ Thêm tuyến truyện</button>
         </div>
         <div class="list-wrap" id="storyline-list-wrap"></div>
       </div>
@@ -229,7 +229,7 @@
       <div id="storyline-form" style="display:none">
         <div class="section-header">
           <h3 id="storyline-form-title">Tuyến truyện mới</h3>
-          <button class="btn btn-sm" onclick="window.cancelStorylineForm()">← Quay lại</button>
+          <button class="btn btn-sm" id="storyline-back-btn">← Quay lại</button>
         </div>
         <div class="card">
           <div class="card-header">Chi tiết tuyến truyện</div>
@@ -245,13 +245,13 @@
             <div class="field" style="flex:0 0 140px"><label>Kiểu</label>
               <select id="storyline-newfield-type"><option value="text">Ngắn</option><option value="textarea">Dài</option></select>
             </div>
-            <button class="btn btn-sm" onclick="window.storylineAddCustomField()">+ Thêm</button>
+            <button class="btn btn-sm" id="storyline-add-custom-btn">+ Thêm</button>
           </div>
         </div>
         <div class="actions">
-          <button class="btn btn-primary" onclick="window.saveStoryline()">✓ Lưu tuyến truyện</button>
-          <button class="btn" onclick="window.cancelStorylineForm()">Hủy</button>
-          <button class="btn btn-danger" id="storyline-delete-btn" style="display:none" onclick="window.deleteStoryline()">Xóa</button>
+          <button class="btn btn-primary" id="save-storyline-btn">✓ Lưu tuyến truyện</button>
+          <button class="btn" id="cancel-storyline-btn">Hủy</button>
+          <button class="btn btn-danger" id="storyline-delete-btn" style="display:none">Xóa</button>
         </div>
       </div>
     </div>
@@ -266,7 +266,7 @@
       <div id="timeline-view">
         <div class="section-header">
           <h3 id="ev-count">0 sự kiện</h3>
-          <button class="btn btn-accent" onclick="window.showEventForm()">+ Thêm sự kiện</button>
+          <button class="btn btn-accent" id="new-event-btn">+ Thêm sự kiện</button>
         </div>
         <div class="timeline" id="timeline-list"></div>
       </div>
@@ -274,7 +274,7 @@
       <div id="event-form" style="display:none">
         <div class="section-header">
           <h3 id="ev-form-title">Sự kiện mới</h3>
-          <button class="btn btn-sm" onclick="window.cancelEventForm()">← Quay lại</button>
+          <button class="btn btn-sm" id="event-back-btn">← Quay lại</button>
         </div>
         <div class="card">
           <div class="card-header">Chi tiết sự kiện</div>
@@ -290,14 +290,14 @@
             <div class="field" style="flex:0 0 140px"><label>Kiểu</label>
               <select id="ev-newfield-type"><option value="text">Ngắn</option><option value="textarea">Dài</option></select>
             </div>
-            <button class="btn btn-sm" onclick="window.eventAddCustomField()">+ Thêm</button>
+            <button class="btn btn-sm" id="ev-add-custom-btn">+ Thêm</button>
           </div>
         </div>
         <div class="actions">
-          <button class="btn btn-primary" onclick="window.saveEvent()">✓ Lưu sự kiện</button>
-          <button class="btn" onclick="window.cancelEventForm()">← Quay lại</button>
-          <button class="btn btn-danger" id="ev-delete-btn" style="display:none" onclick="window.deleteEvent()">Xóa</button>
-          <button class="btn btn-accent" id="ev-create-chap-btn" style="display:none" onclick="window._evOpenCreateChapters()">+ Tạo chương</button>
+          <button class="btn btn-primary" id="save-event-btn">✓ Lưu sự kiện</button>
+          <button class="btn" id="cancel-event-btn">← Quay lại</button>
+          <button class="btn btn-danger" id="ev-delete-btn" style="display:none">Xóa</button>
+          <button class="btn btn-accent" id="ev-create-chap-btn" style="display:none">+ Tạo chương</button>
         </div>
         <div id="ev-chapter-list" style="margin-top:1rem"></div>
       </div>
@@ -320,7 +320,7 @@
       <div id="chapter-form" style="display:none">
         <div class="section-header">
           <h3 id="chap-form-title">Chương mới</h3>
-          <button class="btn btn-sm" onclick="window.cancelChapterForm()">← Quay lại</button>
+          <button class="btn btn-sm" id="chap-back-btn">← Quay lại</button>
         </div>
         <div class="card">
           <div class="card-header">Chi tiết chương</div>
@@ -334,13 +334,13 @@
             <div class="field" style="flex:0 0 140px"><label>Kiểu</label>
               <select id="chap-newfield-type"><option value="text">Ngắn</option><option value="textarea">Dài</option></select>
             </div>
-            <button class="btn btn-sm" onclick="window.chapterAddCustomField()">+ Thêm</button>
+            <button class="btn btn-sm" id="chap-add-custom-btn">+ Thêm</button>
           </div>
         </div>
         <div class="actions">
-          <button class="btn btn-primary" onclick="window.saveChapter()">✓ Lưu chương</button>
-          <button class="btn" onclick="window.cancelChapterForm()">Hủy</button>
-          <button class="btn btn-danger" id="chap-delete-btn" style="display:none" onclick="window.deleteChapter()">Xóa</button>
+          <button class="btn btn-primary" id="save-chap-btn">✓ Lưu chương</button>
+          <button class="btn" id="cancel-chap-btn">Hủy</button>
+          <button class="btn btn-danger" id="chap-delete-btn" style="display:none">Xóa</button>
         </div>
       </div>
     </div>
@@ -355,7 +355,7 @@
       <div id="notes-view">
         <div class="section-header">
           <h3 id="note-count">0 ghi chú</h3>
-          <button class="btn btn-accent" onclick="window.showNoteForm()">+ Thêm ghi chú</button>
+          <button class="btn btn-accent" id="new-note-btn">+ Thêm ghi chú</button>
         </div>
         <div class="list-wrap" id="notes-list"></div>
       </div>
@@ -363,21 +363,21 @@
       <div id="note-form" style="display:none">
         <div class="section-header">
           <h3>Ghi chú</h3>
-          <button class="btn btn-sm" onclick="window.cancelNoteForm()">← Quay lại</button>
+          <button class="btn btn-sm" id="note-back-btn">← Quay lại</button>
         </div>
         <div class="card">
           <div class="field"><label>Tiêu đề</label><input id="n-title" type="text" placeholder="Tiêu đề ghi chú..."></div>
           <div class="field"><label>Nội dung</label><div id="n-content-editor" style="min-height:160px"></div></div>
           <div class="field">
             <label>Tags (nhấn Enter để thêm)</label>
-            <input id="n-tag-input" type="text" placeholder="Thêm tag..." onkeydown="window.noteAddTag(event)">
+            <input id="n-tag-input" type="text" placeholder="Thêm tag...">
             <div class="tags-wrap" id="n-tags"></div>
           </div>
         </div>
         <div class="actions">
-          <button class="btn btn-primary" onclick="window.saveNote()">✓ Lưu ghi chú</button>
-          <button class="btn" onclick="window.cancelNoteForm()">Hủy</button>
-          <button class="btn btn-danger" id="n-delete-btn" style="display:none" onclick="window.deleteNote()">Xóa</button>
+          <button class="btn btn-primary" id="save-note-btn">✓ Lưu ghi chú</button>
+          <button class="btn" id="cancel-note-btn">Hủy</button>
+          <button class="btn btn-danger" id="n-delete-btn" style="display:none">Xóa</button>
         </div>
       </div>
     </div>
@@ -393,7 +393,7 @@
       <div id="sources-view">
         <div class="section-header">
           <h3 id="src-count">0 tài liệu</h3>
-          <button class="btn btn-accent" onclick="window.showSourceForm()">+ Thêm tài liệu</button>
+          <button class="btn btn-accent" id="new-source-btn">+ Thêm tài liệu</button>
         </div>
         <div id="sources-list"></div>
       </div>
@@ -401,7 +401,7 @@
       <div id="source-form" style="display:none">
         <div class="section-header">
           <h3>Tài liệu</h3>
-          <button class="btn btn-sm" onclick="window.cancelSourceForm()">← Quay lại</button>
+          <button class="btn btn-sm" id="source-back-btn">← Quay lại</button>
         </div>
         <div class="card">
           <div class="field"><label>Tiêu đề *</label><input id="s-title" type="text" placeholder="Tên sách / bài viết / nguồn..."></div>
@@ -414,9 +414,9 @@
           <div class="field"><label>Ghi chú</label><textarea id="s-notes" style="min-height:60px" placeholder="Tại sao tài liệu này hữu ích?"></textarea></div>
         </div>
         <div class="actions">
-          <button class="btn btn-primary" onclick="window.saveSource()">✓ Lưu tài liệu</button>
-          <button class="btn" onclick="window.cancelSourceForm()">Hủy</button>
-          <button class="btn btn-danger" id="s-delete-btn" style="display:none" onclick="window.deleteSource()">Xóa</button>
+          <button class="btn btn-primary" id="save-source-btn">✓ Lưu tài liệu</button>
+          <button class="btn" id="cancel-source-btn">Hủy</button>
+          <button class="btn btn-danger" id="s-delete-btn" style="display:none">Xóa</button>
         </div>
       </div>
     </div>
@@ -436,14 +436,14 @@
     <h3 style="font-size:17px;font-weight:700;margin-bottom:1rem">Xuất file</h3>
     <p style="font-size:13px;color:var(--ink-muted);margin-bottom:1.5rem">Chọn định dạng xuất bên dưới</p>
     <div style="display:flex;flex-direction:column;gap:10px">
-      <button class="btn btn-primary" onclick="window._exportPDF()" style="justify-content:center">
+      <button class="btn btn-primary" id="export-pdf-btn" style="justify-content:center">
         🖨 In / Lưu PDF — mở cửa sổ in
       </button>
-      <button class="btn" onclick="window._exportJSON()" style="justify-content:center">
+      <button class="btn" id="export-json-btn" style="justify-content:center">
         📦 Xuất JSON — sao lưu / chuyển máy
       </button>
     </div>
-    <button class="btn btn-sm" onclick="window._closeExportMenu()" style="margin-top:1rem">Hủy</button>
+    <button class="btn btn-sm" id="close-export-btn" style="margin-top:1rem">Hủy</button>
   </div>
 </div>
 
@@ -457,8 +457,8 @@
       Hãy chắc chắn rằng bạn đã <strong>xuất truyện hiện tại thành JSON file</strong> trước khi tiếp tục.
     </p>
     <div class="actions" style="margin-top:1.25rem;justify-content:center">
-      <button class="btn btn-primary" onclick="window._cancelDataWarning()">Dừng thao tác</button>
-      <button class="btn btn-danger" onclick="window._confirmDataWarning()">Tiếp Tục</button>
+      <button class="btn btn-primary" id="cancel-data-warning-btn">Dừng thao tác</button>
+      <button class="btn btn-danger" id="confirm-data-warning-btn">Tiếp Tục</button>
     </div>
   </div>
 </div>
@@ -472,8 +472,8 @@
       <input id="create-chapters-count" type="number" min="1" max="50" value="1">
     </div>
     <div class="actions" style="margin-top:1rem">
-      <button class="btn btn-primary" onclick="window._confirmCreateChapters()">✓ Tạo chương</button>
-      <button class="btn" onclick="document.getElementById('create-chapters-modal').classList.remove('open')">Hủy</button>
+      <button class="btn btn-primary" id="confirm-create-chapters-btn">✓ Tạo chương</button>
+      <button class="btn" id="cancel-create-chapters-btn">Hủy</button>
     </div>
   </div>
 </div>
@@ -487,8 +487,8 @@
       <select id="move-chapter-event-select"></select>
     </div>
     <div class="actions" style="margin-top:1rem">
-      <button class="btn btn-primary" onclick="window._confirmMoveChapter()">✓ Chuyển</button>
-      <button class="btn" onclick="document.getElementById('move-chapter-modal').classList.remove('open')">Hủy</button>
+      <button class="btn btn-primary" id="confirm-move-chapter-btn">✓ Chuyển</button>
+      <button class="btn" id="cancel-move-chapter-btn">Hủy</button>
     </div>
   </div>
 </div>
